@@ -40,8 +40,7 @@ unsigned int flowMilliLitres;
 int totalMilliLitres;
 
 bool flows = false;
-long flowStart = 0;
-long flowEnd = 0;
+bool shouldSync = true;
 
 
 
@@ -103,6 +102,7 @@ void setup() {
 
 void loop() {
   currentMillis = millis();
+  
   if (currentMillis - previousMillis > interval) {
 
     pulse1Sec = pulseCount;
@@ -122,24 +122,23 @@ void loop() {
     flowMilliLitres = (flowRate / 60) * 1000;
 
     // Add the millilitres passed in this second to the cumulative total
+    // Using sensor data to decide user is drinking water 
     if(flowMilliLitres != 0 && !flows){
-      flowStart = millis();
       // water is starting to flow
       flows = true;
     }
     else if(flowMilliLitres == 0 && flows){
-      flowEnd = millis();
       // flow ended
       flows = false;
       if (deviceConnected) {
 
-
+      // send value
       pCharacteristic->setValue(totalMilliLitres);
       Serial.print(totalMilliLitres);
       Serial.println(" sent.");
       pCharacteristic->notify();
 
-
+      // reset value
       totalMilliLitres = 0;
       }
       // disconnecting
@@ -160,6 +159,7 @@ void loop() {
     totalMilliLitres += flowMilliLitres;
 
     // Print the flow rate for this second in litres / minute
+    /*
     Serial.print("Flow rate: ");
     Serial.print(int(flowRate));  // Print the integer part of the variable
     Serial.print("L/min");
@@ -171,6 +171,7 @@ void loop() {
     Serial.print("mL / ");
     Serial.print(totalMilliLitres / 1000);
     Serial.println("L");
+    */
   }
   
 }
