@@ -48,6 +48,16 @@ void IRAM_ATTR pulseCounter() {
   pulseCount++;
 }
 
+class CharacteristicCallBack: public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *pChar) override {
+    std::string dateTime = pChar -> getValue();
+    std::string dateTimeMilliletre = dateTime + std::to_string(totalMilliLitres);
+    pCharacteristic->notify();
+    Serial.print(String(dateTimeMilliletre.c_str()));
+    Serial.println(" sent.");
+  }
+};
+
 void setup() {
   Serial.begin(115200);
 
@@ -88,6 +98,8 @@ void setup() {
   // Create a BLE Descriptor
   pCharacteristic->addDescriptor(new BLE2902());
 
+  
+
   // Start the service
   pService->start();
 
@@ -99,6 +111,7 @@ void setup() {
   BLEDevice::startAdvertising();
   Serial.println("Waiting a client connection to notify...");
 }
+
 
 void loop() {
   currentMillis = millis();
@@ -132,14 +145,11 @@ void loop() {
       flows = false;
       if (deviceConnected) {
 
-      // send value
-      pCharacteristic->setValue(totalMilliLitres);
-      Serial.print(totalMilliLitres);
-      Serial.println(" sent.");
-      pCharacteristic->notify();
+          // send value
+          pCharacteristic->setValue("-");
+          Serial.println("Date time request sent.");
+          pCharacteristic->notify();
 
-      // reset value
-      totalMilliLitres = 0;
       }
       // disconnecting
       if (!deviceConnected && oldDeviceConnected) {
@@ -158,20 +168,6 @@ void loop() {
 
     totalMilliLitres += flowMilliLitres;
 
-    // Print the flow rate for this second in litres / minute
-    /*
-    Serial.print("Flow rate: ");
-    Serial.print(int(flowRate));  // Print the integer part of the variable
-    Serial.print("L/min");
-    Serial.print("\t");  // Print tab space
-
-    // Print the cumulative total of litres flowed since starting
-    Serial.print("Output Liquid Quantity: ");
-    Serial.print(totalMilliLitres);
-    Serial.print("mL / ");
-    Serial.print(totalMilliLitres / 1000);
-    Serial.println("L");
-    */
   }
   
 }
