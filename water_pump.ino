@@ -50,6 +50,8 @@ void IRAM_ATTR pulseCounter() {
 
 class CharacteristicCallBack: public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic *pChar) override {
+
+    // ADDING TIME STAMP AND SENDING BACK
     std::string dateTime = pChar -> getValue();
     std::string dateTimeMilliletre = dateTime + std::to_string(totalMilliLitres);
     pCharacteristic->notify();
