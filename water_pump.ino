@@ -41,6 +41,7 @@ int totalMilliLitres;
 
 bool flows = false;
 bool shouldSync = true;
+std::string dateTimeMilliletre;
 
 
 
@@ -53,7 +54,8 @@ class CharacteristicCallBack: public BLECharacteristicCallbacks {
 
     // ADDING TIME STAMP AND SENDING BACK
     std::string dateTime = pChar -> getValue();
-    std::string dateTimeMilliletre = dateTime + std::to_string(totalMilliLitres);
+    dateTimeMilliletre = dateTime + std::to_string(totalMilliLitres);
+    pCharacteristic->setValue(dateTimeMilliletre);
     pCharacteristic->notify();
     Serial.print(String(dateTimeMilliletre.c_str()));
     Serial.println(" sent.");
@@ -100,7 +102,7 @@ void setup() {
   // Create a BLE Descriptor
   pCharacteristic->addDescriptor(new BLE2902());
 
-  
+  pCharacteristic->setCallbacks(new CharacteristicCallBack());
 
   // Start the service
   pService->start();
@@ -146,11 +148,10 @@ void loop() {
       // flow ended
       flows = false;
       if (deviceConnected) {
-
-          // send value
           pCharacteristic->setValue("-");
-          Serial.println("Date time request sent.");
           pCharacteristic->notify();
+          Serial.println("Date time request sent.");
+          
 
       }
       // disconnecting
